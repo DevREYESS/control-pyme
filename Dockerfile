@@ -1,5 +1,5 @@
 # Etapa 1: Construcción
-FROM maven:3.9-eclipse-temurin-17 AS build
+FROM maven:3.9-eclipse-temurin-21 AS build
 
 WORKDIR /app
 
@@ -16,7 +16,7 @@ COPY src ./src
 RUN mvn clean package -DskipTests
 
 # Etapa 2: Ejecución
-FROM eclipse-temurin:17-jre-alpine
+FROM eclipse-temurin:21-jre-alpine
 
 WORKDIR /app
 
@@ -24,7 +24,7 @@ WORKDIR /app
 COPY --from=build /app/target/*.jar app.jar
 
 # Exponer el puerto (ajusta según tu aplicación)
-EXPOSE 8100
+EXPOSE 8080
 
 # Variables de entorno (opcional)
 ENV JAVA_OPTS="-Xmx512m -Xms256m"
