@@ -6,7 +6,6 @@ import com.tienda.inventario.entity.Movimiento.TipoMovimiento;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -20,11 +19,11 @@ public interface MovimientoRepository extends JpaRepository<Movimiento, Long> {
     // Obtener movimientos por tipo
     List<Movimiento> findByTipoOrderByFechaDesc(TipoMovimiento tipo);
 
-    // Filtrar movimientos por tipo y rango de fechas - USANDO PARÁMETROS POSICIONALES
+    // Filtrar movimientos - SIN CASTING, dejamos que Spring maneje los tipos
     @Query(value = "SELECT * FROM movimientos m WHERE " +
-            "(?1::VARCHAR IS NULL OR m.tipo = ?1::VARCHAR) AND " +
-            "(?2::TIMESTAMP IS NULL OR m.fecha >= ?2::TIMESTAMP) AND " +
-            "(?3::TIMESTAMP IS NULL OR m.fecha <= ?3::TIMESTAMP) " +
+            "(?1 IS NULL OR m.tipo = ?1) AND " +
+            "(?2 IS NULL OR m.fecha >= ?2) AND " +
+            "(?3 IS NULL OR m.fecha <= ?3) " +
             "ORDER BY m.fecha DESC",
             nativeQuery = true)
     List<Movimiento> filtrarMovimientos(
