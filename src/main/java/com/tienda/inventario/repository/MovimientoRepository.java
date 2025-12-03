@@ -22,10 +22,10 @@ public interface MovimientoRepository extends JpaRepository<Movimiento, Long> {
     
     // Filtrar movimientos por tipo y rango de fechas
     @Query("SELECT m FROM Movimiento m WHERE " +
-           "(:tipo IS NULL OR m.tipo = :tipo) AND " +
-           "(:fechaInicio IS NULL OR m.fecha >= :fechaInicio) AND " +
-           "(:fechaFin IS NULL OR m.fecha <= :fechaFin) " +
-           "ORDER BY m.fecha DESC")
+            "(:tipo IS NULL OR m.tipo = :tipo) AND " +
+            "(:fechaInicio IS NULL OR m.fecha >= CAST(:fechaInicio AS timestamp)) AND " +
+            "(:fechaFin IS NULL OR m.fecha <= CAST(:fechaFin AS timestamp)) " +
+            "ORDER BY m.fecha DESC")
     List<Movimiento> filtrarMovimientos(
             @Param("tipo") TipoMovimiento tipo,
             @Param("fechaInicio") LocalDateTime fechaInicio,
