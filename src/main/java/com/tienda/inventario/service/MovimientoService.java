@@ -16,52 +16,60 @@ import java.util.stream.Collectors;
 @Service
 @Transactional
 public class MovimientoService {
-    
+
     @Autowired
     private MovimientoRepository movimientoRepository;
-    
+
     @Autowired
     private ProductoRepository productoRepository;
-    
+
     @Autowired
     private ProductoService productoService;
-    
+
     // Obtener todos los movimientos
     public List<MovimientoDTO> obtenerTodos() {
         return movimientoRepository.findAll().stream()
                 .map(this::convertirADTO)
                 .collect(Collectors.toList());
     }
-    
+
     // Obtener movimientos por producto
     public List<MovimientoDTO> obtenerPorProducto(Long productoId) {
         return movimientoRepository.findByProductoIdOrderByFechaDesc(productoId).stream()
                 .map(this::convertirADTO)
                 .collect(Collectors.toList());
     }
-    
-    // Filtrar movimientos
+
+    // Filtrar movimientos - MODIFICADO
     public List<MovimientoDTO> filtrarMovimientos(String tipo, LocalDateTime fechaInicio, LocalDateTime fechaFin) {
-        TipoMovimiento tipoMovimiento = null;
+        // Convertir String a String (validando que sea un tipo válido)
+        String tipoStr = null;
         if (tipo != null && !tipo.isEmpty()) {
-            tipoMovimiento = TipoMovimiento.valueOf(tipo.toUpperCase());
+            try {
+                // Validar que el tipo sea válido
+                TipoMovimiento.valueOf(tipo.toUpperCase());
+                tipoStr = tipo.toUpperCase();
+            } catch (IllegalArgumentException e) {
+                throw new RuntimeException("Tipo de movimiento inválido: " + tipo);
+            }
         }
-        
-        return movimientoRepository.filtrarMovimientos(tipoMovimiento, fechaInicio, fechaFin).stream()
+
+        // Pasar String directamente al repositorio
+        return movimientoRepository.filtrarMovimientos(tipoStr, fechaInicio, fechaFin).stream()
                 .map(this::convertirADTO)
                 .collect(Collectors.toList());
     }
-    
+
     // Crear movimiento (registra y actualiza stock)
     public MovimientoDTO crear(MovimientoDTO movimientoDTO) {
         // Verificar que el producto existe
         Producto producto = productoRepository.findById(movimientoDTO.getProductoId())
                 .orElseThrow(() -> new RuntimeException("Producto no encontrado con ID: " + movimientoDTO.getProductoId()));
-        
+
         // Actualizar el stock del producto
         boolean esEntrada = movimientoDTO.getTipo() == TipoMovimiento.ENTRADA;
         productoService.actualizarStock(producto.getId(), movimientoDTO.getCantidad(), esEntrada);
-        
+
         // Crear el movimiento
         Movimiento movimiento = new Movimiento();
         movimiento.setProducto(producto);
@@ -69,18 +77,18 @@ public class MovimientoService {
         movimiento.setCantidad(movimientoDTO.getCantidad());
         movimiento.setMotivo(movimientoDTO.getMotivo());
         movimiento.setUsuario(movimientoDTO.getUsuario());
-        
+
         Movimiento guardado = movimientoRepository.save(movimiento);
         return convertirADTO(guardado);
     }
-    
+
     // Obtener últimos movimientos
     public List<MovimientoDTO> obtenerUltimos() {
         return movimientoRepository.findTop10ByOrderByFechaDesc().stream()
                 .map(this::convertirADTO)
                 .collect(Collectors.toList());
     }
-    
+
     // Convertir entidad a DTO
     private MovimientoDTO convertirADTO(Movimiento movimiento) {
         MovimientoDTO dto = new MovimientoDTO();
