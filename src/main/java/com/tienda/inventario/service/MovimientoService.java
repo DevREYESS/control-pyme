@@ -42,20 +42,17 @@ public class MovimientoService {
 
     // Filtrar movimientos - MODIFICADO
     public List<MovimientoDTO> filtrarMovimientos(String tipo, LocalDateTime fechaInicio, LocalDateTime fechaFin) {
-        // Convertir String a String (validando que sea un tipo válido)
-        String tipoStr = null;
+        TipoMovimiento tipoEnum = null;
         if (tipo != null && !tipo.isEmpty()) {
             try {
-                // Validar que el tipo sea válido
-                TipoMovimiento.valueOf(tipo.toUpperCase());
-                tipoStr = tipo.toUpperCase();
+                tipoEnum = TipoMovimiento.valueOf(tipo.toUpperCase());
             } catch (IllegalArgumentException e) {
                 throw new RuntimeException("Tipo de movimiento inválido: " + tipo);
             }
         }
 
-        // Pasar String directamente al repositorio
-        return movimientoRepository.filtrarMovimientos(tipoStr, fechaInicio, fechaFin).stream()
+        return movimientoRepository.filtrarMovimientos(tipoEnum, fechaInicio, fechaFin)
+                .stream()
                 .map(this::convertirADTO)
                 .collect(Collectors.toList());
     }

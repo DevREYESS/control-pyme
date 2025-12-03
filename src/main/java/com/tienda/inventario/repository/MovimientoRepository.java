@@ -6,6 +6,7 @@ import com.tienda.inventario.entity.Movimiento.TipoMovimiento;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -19,17 +20,16 @@ public interface MovimientoRepository extends JpaRepository<Movimiento, Long> {
     // Obtener movimientos por tipo
     List<Movimiento> findByTipoOrderByFechaDesc(TipoMovimiento tipo);
 
-    // Filtrar movimientos - SIN CASTING, dejamos que Spring maneje los tipos
-    @Query(value = "SELECT * FROM movimientos m WHERE " +
-            "(?1 IS NULL OR m.tipo = ?1) AND " +
-            "(?2 IS NULL OR m.fecha >= ?2) AND " +
-            "(?3 IS NULL OR m.fecha <= ?3) " +
-            "ORDER BY m.fecha DESC",
-            nativeQuery = true)
+    // JPQL - Spring maneja los tipos automáticamente
+    @Query("SELECT m FROM Movimiento m WHERE " +
+            "(:tipo IS NULL OR m.tipo = :tipo) AND " +
+            "(:fechaInicio IS NULL OR m.fecha >= :fechaInicio) AND " +
+            "(:fechaFin IS NULL OR m.fecha <= :fechaFin) " +
+            "ORDER BY m.fecha DESC")
     List<Movimiento> filtrarMovimientos(
-            String tipo,
-            LocalDateTime fechaInicio,
-            LocalDateTime fechaFin
+            @Param("tipo") TipoMovimiento tipo,
+            @Param("fechaInicio") LocalDateTime fechaInicio,
+            @Param("fechaFin") LocalDateTime fechaFin
     );
 
     // Obtener últimos N movimientos
