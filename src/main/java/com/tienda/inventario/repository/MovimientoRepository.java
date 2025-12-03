@@ -23,8 +23,8 @@ public interface MovimientoRepository extends JpaRepository<Movimiento, Long> {
     // JPQL - Spring maneja los tipos automáticamente
     @Query("SELECT m FROM Movimiento m WHERE " +
             "(:tipo IS NULL OR m.tipo = :tipo) AND " +
-            "(:fechaInicio IS NULL OR m.fecha >= :fechaInicio) AND " +
-            "(:fechaFin IS NULL OR m.fecha <= :fechaFin) " +
+            "(m.fecha >= COALESCE(:fechaInicio, m.fecha)) AND " +
+            "(m.fecha <= COALESCE(:fechaFin, m.fecha)) " +
             "ORDER BY m.fecha DESC")
     List<Movimiento> filtrarMovimientos(
             @Param("tipo") TipoMovimiento tipo,
