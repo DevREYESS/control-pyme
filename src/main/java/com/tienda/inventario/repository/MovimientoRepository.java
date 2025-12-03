@@ -20,17 +20,17 @@ public interface MovimientoRepository extends JpaRepository<Movimiento, Long> {
     // Obtener movimientos por tipo
     List<Movimiento> findByTipoOrderByFechaDesc(TipoMovimiento tipo);
 
-    // Filtrar movimientos por tipo y rango de fechas - CON CASTING EXPLÍCITO EN POSTGRESQL
+    // Filtrar movimientos por tipo y rango de fechas - USANDO PARÁMETROS POSICIONALES
     @Query(value = "SELECT * FROM movimientos m WHERE " +
-            "(:tipo::VARCHAR IS NULL OR m.tipo = :tipo::VARCHAR) AND " +
-            "(:fechaInicio::TIMESTAMP IS NULL OR m.fecha >= :fechaInicio::TIMESTAMP) AND " +
-            "(:fechaFin::TIMESTAMP IS NULL OR m.fecha <= :fechaFin::TIMESTAMP) " +
+            "(?1::VARCHAR IS NULL OR m.tipo = ?1::VARCHAR) AND " +
+            "(?2::TIMESTAMP IS NULL OR m.fecha >= ?2::TIMESTAMP) AND " +
+            "(?3::TIMESTAMP IS NULL OR m.fecha <= ?3::TIMESTAMP) " +
             "ORDER BY m.fecha DESC",
             nativeQuery = true)
     List<Movimiento> filtrarMovimientos(
-            @Param("tipo") String tipo,
-            @Param("fechaInicio") LocalDateTime fechaInicio,
-            @Param("fechaFin") LocalDateTime fechaFin
+            String tipo,
+            LocalDateTime fechaInicio,
+            LocalDateTime fechaFin
     );
 
     // Obtener últimos N movimientos
